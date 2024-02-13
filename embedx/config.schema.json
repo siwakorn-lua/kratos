@@ -1952,7 +1952,6 @@
               "default": "localhost"
             }
           },
-          "required": ["connection_uri"],
           "additionalProperties": false
         },
         "sms": {
@@ -2036,19 +2035,43 @@
                 "title": "Channel id",
                 "description": "The channel id. Corresponds to the .via property of the identity schema for recovery, verification, etc. Currently only phone is supported.",
                 "maxLength": 32,
-                "enum": ["sms"]
+                "enum": ["sms", "email"]
               },
               "type": {
                 "type": "string",
                 "title": "Channel type",
                 "description": "The channel type. Currently only http is supported.",
-                "enum": ["http"]
+                "enum": ["http", "smtp"]
               },
               "request_config": {
                 "$ref": "#/definitions/httpRequestConfig"
+              },
+              "smtp_config": {
+                "connection_uri": {
+                  "title": "SMTP connection string",
+                  "description": "This URI will be used to connect to the SMTP server. Use the scheme smtps for implicit TLS sessions or smtp for explicit StartTLS/cleartext sessions. Please note that TLS is always enforced with certificate trust verification by default for security reasons on both schemes. With the smtp scheme you can use the query parameter (`?disable_starttls=true`) to allow cleartext sessions or (`?disable_starttls=false`) to enforce StartTLS (default behaviour). Additionally, use the query parameter to allow (`?skip_ssl_verify=true`) or disallow (`?skip_ssl_verify=false`) self-signed TLS certificates (default behaviour) on both implicit and explicit TLS sessions.",
+                  "examples": [
+                    "smtps://foo:bar@my-mailserver:1234/?skip_ssl_verify=false",
+                    "smtp://foo:bar@my-mailserver:1234/?disable_starttls=true (NOT RECOMMENDED: Cleartext smtp for devel and legacy infrastructure only)",
+                    "smtp://foo:bar@my-mailserver:1234/ (Explicit StartTLS with certificate trust verification)",
+                    "smtp://foo:bar@my-mailserver:1234/?skip_ssl_verify=true (NOT RECOMMENDED: Explicit StartTLS without certificate trust verification)",
+                    "smtps://foo:bar@my-mailserver:1234/ (Implicit TLS with certificate trust verification)",
+                    "smtps://foo:bar@my-mailserver:1234/?skip_ssl_verify=true (NOT RECOMMENDED: Implicit TLS without certificate trust verification)",
+                    "smtps://subdomain.my-mailserver:1234/?server_name=my-mailserver (allows TLS to work if the server is hosted on a sudomain that uses a non-wildcard domain certificate)"
+                  ],
+                  "type": "string",
+                  "pattern": "^smtps?:\\/\\/.*"
+                },
+                "from_address": {
+                  "title": "SMTP Sender Address",
+                  "description": "The recipient of an email will see this as the sender address.",
+                  "type": "string",
+                  "format": "email",
+                  "default": "no-reply@ory.kratos.sh"
+                }
               }
             },
-            "required": ["id", "request_config"],
+            "required": ["id"],
             "additionalProperties": false
           }
         }
